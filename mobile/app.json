@@ -1,0 +1,29 @@
+{
+  "expo": {
+    "name": "부적발급소",
+    "slug": "boojeok-app",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "scheme": "boojeok",
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.shwach.boojeokapp"
+    },
+    "android": {
+      "package": "com.shwach.boojeokapp",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#F5EDD6"
+      }
+    },
+    "plugins": [
+      "expo-router",
+      "expo-status-bar"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}

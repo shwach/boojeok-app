@@ -43,7 +43,11 @@ app.post('/api/draw', async (req, res) => {
     const used = await query('SELECT 1 FROM daily_draws WHERE user_id=$1 AND draw_date=$2', [userId, today]);
     if (used.rows.length > 0) return res.status(400).json({ error: '오늘 무료 뽑기를 이미 사용했어요' });
 
-    const { rows: talismans } = await query('SELECT * FROM talismans');
+    const { category } = req.body;
+    const { rows: talismans } = category
+      ? await query('SELECT * FROM talismans WHERE category = $1', [category])
+      : await query('SELECT * FROM talismans');
+    if (talismans.length === 0) return res.status(400).json({ error: '해당 카테고리 부적이 없어요' });
     const talisman = talismans[Math.floor(Math.random() * talismans.length)];
 
     const ut = { id: uuid(), user_id: userId, talisman_id: talisman.id, level: 0, status: 'active' };
