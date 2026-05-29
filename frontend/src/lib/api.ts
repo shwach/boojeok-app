@@ -1,4 +1,6 @@
-const BASE = 'http://localhost:3461/api';
+const BASE = import.meta.env.PROD
+  ? 'https://boojeok-app.onrender.com/api'
+  : 'http://localhost:3461/api';
 
 function headers() {
   const userId = localStorage.getItem('userId') ?? '';
