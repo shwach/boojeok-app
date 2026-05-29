@@ -16,7 +16,10 @@ if (isPg) {
   _initDb = async () => {
     await pool.query(`
       CREATE TABLE IF NOT EXISTS users (
-        id TEXT PRIMARY KEY, nickname TEXT UNIQUE NOT NULL, created_at TIMESTAMPTZ DEFAULT NOW()
+        id TEXT PRIMARY KEY,
+        nickname TEXT NOT NULL DEFAULT '부적 초보자',
+        device_id TEXT UNIQUE,
+        created_at TIMESTAMPTZ DEFAULT NOW()
       );
       CREATE TABLE IF NOT EXISTS talismans (
         id TEXT PRIMARY KEY, category TEXT NOT NULL, base_name TEXT NOT NULL,
@@ -46,7 +49,7 @@ if (isPg) {
   db.pragma('journal_mode = WAL');
   db.pragma('foreign_keys = ON');
   db.exec(`
-    CREATE TABLE IF NOT EXISTS users (id TEXT PRIMARY KEY, nickname TEXT UNIQUE NOT NULL, created_at TEXT DEFAULT (datetime('now')));
+    CREATE TABLE IF NOT EXISTS users (id TEXT PRIMARY KEY, nickname TEXT NOT NULL DEFAULT '부적 초보자', device_id TEXT UNIQUE, created_at TEXT DEFAULT (datetime('now')));
     CREATE TABLE IF NOT EXISTS talismans (id TEXT PRIMARY KEY, category TEXT NOT NULL, base_name TEXT NOT NULL, rarity TEXT NOT NULL DEFAULT 'common', emoji TEXT NOT NULL DEFAULT '🏮', quote TEXT NOT NULL DEFAULT '');
     CREATE TABLE IF NOT EXISTS user_talismans (id TEXT PRIMARY KEY, user_id TEXT NOT NULL REFERENCES users(id), talisman_id TEXT NOT NULL REFERENCES talismans(id), level INTEGER NOT NULL DEFAULT 0, status TEXT NOT NULL DEFAULT 'active', obtained_at TEXT DEFAULT (datetime('now')), broken_at TEXT);
     CREATE TABLE IF NOT EXISTS enhancement_logs (id TEXT PRIMARY KEY, user_talisman_id TEXT NOT NULL REFERENCES user_talismans(id), from_level INTEGER NOT NULL, to_level INTEGER, success INTEGER NOT NULL, destroyed INTEGER NOT NULL DEFAULT 0, created_at TEXT DEFAULT (datetime('now')));

@@ -1,9 +1,9 @@
 import { useEffect, useState, useCallback } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert, TextInput, Modal } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router, useFocusEffect } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { getInventory, getDrawStatus } from '../../lib/api';
+import { getInventory, getDrawStatus, updateNickname } from '../../lib/api';
 import { C, CATEGORY_LABEL, RARITY_LABEL, RARITY_COLOR } from '../../lib/theme';
 
 export default function Home() {
@@ -11,6 +11,8 @@ export default function Home() {
   const [canDraw, setCanDraw] = useState(false);
   const [filter, setFilter] = useState('all');
   const [nickname, setNickname] = useState('무명');
+  const [editModal, setEditModal] = useState(false);
+  const [editName, setEditName] = useState('');
 
   useFocusEffect(useCallback(() => {
     AsyncStorage.getItem('nickname').then(n => n && setNickname(n));
@@ -21,6 +23,14 @@ export default function Home() {
   const filtered = filter === 'all' ? items : items.filter(i => i.category === filter);
   const cat = (key: string) => C[key as keyof typeof C] as any;
 
+  async function handleNicknameUpdate() {
+    if (!editName.trim()) return;
+    await updateNickname(editName.trim());
+    await AsyncStorage.setItem('nickname', editName.trim());
+    setNickname(editName.trim());
+    setEditModal(false);
+  }
+
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: C.cream }}>
     <ScrollView style={s.container} contentContainerStyle={{ paddingBottom: 24 }}>
@@ -29,8 +39,36 @@ export default function Home() {
           <Text style={s.headerSub}>안녕하세요</Text>
           <Text style={s.headerName}>{nickname} 님 👋</Text>
         </View>
-        <View style={s.avatar}><Text style={{ fontSize: 20 }}>🧿</Text></View>
+        <TouchableOpacity style={s.avatar} onPress={() => { setEditName(nickname); setEditModal(true); }}>
+          <Text style={{ fontSize: 20 }}>🧿</Text>
+        </TouchableOpacity>
       </View>
+
+      {/* 닉네임 변경 모달 */}
+      <Modal visible={editModal} transparent animationType="fade">
+        <View style={s.modalBg}>
+          <View style={s.modalBox}>
+            <Text style={s.modalTitle}>닉네임 변경</Text>
+            <TextInput
+              style={s.modalInput}
+              value={editName}
+              onChangeText={setEditName}
+              placeholder="새 닉네임 입력"
+              placeholderTextColor={C.inkLight}
+              maxLength={12}
+              autoFocus
+            />
+            <View style={{ flexDirection: 'row', gap: 8 }}>
+              <TouchableOpacity style={[s.modalBtn, { backgroundColor: C.parchment, flex: 1 }]} onPress={() => setEditModal(false)}>
+                <Text style={{ color: C.inkLight, fontWeight: '600' }}>취소</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={[s.modalBtn, { backgroundColor: C.red, flex: 1 }]} onPress={handleNicknameUpdate}>
+                <Text style={{ color: 'white', fontWeight: '700' }}>저장</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
 
       {/* 뽑기 배너 */}
       <TouchableOpacity style={s.banner} onPress={() => router.push('/(tabs)/draw')} activeOpacity={0.85}>
@@ -106,6 +144,11 @@ const s = StyleSheet.create({
   invTitle: { fontSize: 14, fontWeight: '700', color: C.ink },
   invCount: { fontSize: 12, color: C.inkLight },
   empty: { alignItems: 'center', paddingVertical: 40 },
+  modalBg: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center', padding: 24 },
+  modalBox: { backgroundColor: C.cream, borderRadius: 20, padding: 24, width: '100%' },
+  modalTitle: { fontSize: 18, fontWeight: '700', color: C.ink, marginBottom: 16, textAlign: 'center' },
+  modalInput: { backgroundColor: 'white', borderWidth: 1.5, borderColor: C.border, borderRadius: 12, padding: 12, fontSize: 15, color: C.ink, marginBottom: 16 },
+  modalBtn: { borderRadius: 12, padding: 12, alignItems: 'center' },
   item: { flexDirection: 'row', alignItems: 'center', gap: 11, backgroundColor: 'white', borderRadius: 14, padding: 12, borderWidth: 1.5, borderColor: C.parchment, marginBottom: 8 },
   itemIcon: { width: 42, height: 42, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
   itemName: { fontSize: 13, fontWeight: '700', color: C.ink, marginBottom: 4 },

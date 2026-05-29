@@ -9,6 +9,34 @@ app.use(cors());
 app.use(express.json());
 
 // ── Auth ────────────────────────────────────────────────
+// 자동 익명 가입 (앱 첫 실행 시 호출)
+app.post('/api/auth/auto', async (req, res) => {
+  try {
+    const { deviceId } = req.body;
+    if (!deviceId) return res.status(400).json({ error: 'deviceId required' });
+
+    const { rows } = await query('SELECT * FROM users WHERE device_id = $1', [deviceId]);
+    if (rows[0]) return res.json({ user: rows[0] });
+
+    const user = { id: uuid(), nickname: '부적 초보자', device_id: deviceId };
+    await query('INSERT INTO users (id, nickname, device_id) VALUES ($1, $2, $3)', [user.id, user.nickname, user.device_id]);
+    res.json({ user });
+  } catch (e) { res.status(500).json({ error: String(e) }); }
+});
+
+// 닉네임 변경
+app.patch('/api/auth/nickname', async (req, res) => {
+  try {
+    const userId = req.headers['x-user-id'] as string;
+    const { nickname } = req.body;
+    if (!nickname?.trim()) return res.status(400).json({ error: '닉네임을 입력해주세요' });
+
+    await query('UPDATE users SET nickname = $1 WHERE id = $2', [nickname.trim(), userId]);
+    res.json({ ok: true });
+  } catch (e) { res.status(500).json({ error: String(e) }); }
+});
+
+// 기존 guest 엔드포인트 유지 (웹 버전 호환)
 app.post('/api/auth/guest', async (req, res) => {
   try {
     const { nickname } = req.body;

@@ -7,6 +7,28 @@ async function headers() {
   return { 'Content-Type': 'application/json', 'x-user-id': userId };
 }
 
+// 앱 첫 실행 시 자동 익명 가입
+export async function autoLogin(deviceId: string) {
+  const r = await fetch(`${BASE}/auth/auto`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ deviceId }),
+  });
+  if (!r.ok) throw new Error((await r.json()).error);
+  return r.json();
+}
+
+// 닉네임 변경
+export async function updateNickname(nickname: string) {
+  const r = await fetch(`${BASE}/auth/nickname`, {
+    method: 'PATCH',
+    headers: await headers(),
+    body: JSON.stringify({ nickname }),
+  });
+  if (!r.ok) throw new Error((await r.json()).error);
+  return r.json();
+}
+
 export async function guestLogin(nickname: string) {
   const r = await fetch(`${BASE}/auth/guest`, {
     method: 'POST',
