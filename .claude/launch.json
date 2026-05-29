@@ -1,0 +1,18 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "mockup2",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["serve", "docs", "-l", "3457"],
+      "port": 3457
+    },
+    {
+      "name": "frontend",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev"],
+      "port": 3460,
+      "cwd": "/Users/user/Downloads/charm/frontend"
+    }
+  ]
+}
